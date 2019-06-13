@@ -4,7 +4,7 @@ from starlette.requests import Request
 from fastai import *
 from fastai.vision import *
 import asyncio
-
+import aiohttp
 import uvicorn
 
 classes = ['guitar', 'ukulele']
@@ -26,6 +26,12 @@ learn = loop.run_until_complete(asyncio.gather(*tasks))[0]
 loop.close()
 
 app = Starlette (debug = True)
+
+async def get_img_from_url(url):
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            return await response.read()
+
 
 
 def make_prediction(data):
@@ -73,7 +79,7 @@ async def upload(request):
 
 @app.route('/dawaj-url', methods = ['GET'])
 async def dawaj_url (request):
-    print (request)
+    url = request.query_params['url']
     data = await get_img_from_url(url)
     return make_prediction (data)
 
